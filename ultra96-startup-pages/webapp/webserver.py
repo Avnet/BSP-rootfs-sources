@@ -100,15 +100,15 @@ def createWiFi(output):
     ssid =False
     password = False
     for line in output.splitlines():
-        line.strip()
-        if "SSID" in line:
+        line = line.strip()
+        if line.startswith("SSID"):
             ssid_list = line.split(": ")
             if len(ssid_list) == 2:
                 ssid_name = ssid_list[1]
             ssid = True
-        elif "RSN" in line:
+        elif line.startswith("RSN"):
             password = True
-        elif "BSS" in line:
+        elif line.startswith("BSS"):
             if ssid and password:
                 password_ssid.append(ssid_name)
             if ssid and not password: 
