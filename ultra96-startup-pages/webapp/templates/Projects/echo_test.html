@@ -35,20 +35,21 @@
 {% block content %}
 
 <div class="page-header">
-  <h1 class="display-4"><b>{% block title %}OpenAMP Matrix Multiplication{% endblock %}</b></h1>
+  <h1 class="display-4"><b>{% block title %}OpenAMP Echo Test Application{% endblock %}</b></h1>
 </div>
 
 <h2>Description</h2>
 <div class="well">
-  <p>The matrix multiplication application example provides a complex test that generates two matrices on the Linux Cortex-A53 master. These matrices are then sent to the Cortex-R5 remote, which is used to multiply the matrices. The remote then sends the result back to the master, which display the result.</p>
-  <p>The Linux master boots the bare-metal remote firmware using <b>remoteproc</b>. It then trasmits two randomly-generated matrices using <b>RPMsg</b>.</p>
-  <p>The bare-metal firmware multiplies the two matrices and transmits the result back to the master using RPMsg.<p>
-  <p>The complete results will be displayed below after the matrix multiply is finished.</p>
+
+  <p>The echo test application example provides a complex test of the integrity of inter processor communication from linux userspace to a remote software context.</p>
+  <p>The application sends chunks of data to the remote processor using <b>remoteproc</b>. The remote side echoes the data back to application which then validates the data returned.</p>
+  <p>This application takes a few seconds to run, so be patient.  The complete results will be displayed below.</p>
+  <p>The complete results will be displayed below after the echo test is finished.</p>
 
   <p>More information can be found in the latest <a href="https://www.xilinx.com/support/documentation/sw_manuals/xilinx2020_1/ug1186-zynq-openamp-gsg.pdf">UG1186</a> documentation (an internet connection is required to view this page).</p>
 </div>
 
-<form action="matrix_mult.html" method="post" id="matrix_form">
+<form action="echo_test.html" method="post" id="matrix_form">
   <center><button type="submit" class="btn btn-primary" id="grey_out" onclick="greyButton()">Run Project</button></center>
 </form>
 

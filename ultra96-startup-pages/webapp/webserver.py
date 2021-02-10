@@ -25,7 +25,7 @@
 #
 ###############################################################################
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from multiprocessing import Pipe
 import random
 import crypt
@@ -491,23 +491,69 @@ def viewer():
         remaining_time = int(timeout) - int(elapsed_time)
         return render_template("Projects/viewer.html", code=code, filename=os.path.basename(request.args.get('filename')), timeout=timeout, remaining_time=remaining_time, timer_status=timer_status, log="No log data. Run code to get log data")
 
+@app.route('/iperf3_s.html', methods=['GET', 'POST'])
+def iperf3_s():
+    if request.method == 'POST':
+        #Start the iperf3 server to run and stop after the first connection finishes
+        os.system("iperf3 -s -i 2 -1 > ~/iperf3_s_results.txt")
+        output = ""
+        with open("/home/root/iperf3_s_results.txt","r") as file:
+            output = file.read()
+
+        return render_template("Projects/iperf3_s.html", output=output)
+    else:
+        return render_template("Projects/iperf3_s.html", output="")
+
+@app.route('/iperf3_c.html', methods=['GET', 'POST'])
+def iperf3_c():
+    if request.method == 'POST':
+        #Fetch the IP address of the remote PC that is running the iperf3 server
+        IP_addr = request.environ['REMOTE_ADDR']
+      
+        #Start the iperf3 client to update every 2 seconds and stop after 20 seconds
+        os.system("iperf3 -c " +IP_addr+ " -i 2 -t 20 > ~/iperf3_c_results.txt")
+
+        output = ""
+        with open("/home/root/iperf3_c_results.txt","r") as file:
+            output = file.read()
+
+        return render_template("Projects/iperf3_c.html", output=output)
+    else:
+        return render_template("Projects/iperf3_c.html", output="")
+
+@app.route('/echo_test.html', methods=['GET', 'POST'])
+def echo_test():
+    if request.method == 'POST':
+        os.system("echo image_echo_test > /sys/class/remoteproc/remoteproc0/firmware")
+        os.system("echo start > /sys/class/remoteproc/remoteproc0/state")
+        os.system("modprobe rpmsg_char")
+        os.system("echo_test > ~/echo_results.txt")
+        output = ""
+        with open("/home/root/echo_results.txt","r") as file:
+            output = file.read()
+
+        os.system("modprobe -r rpmsg_char")
+        os.system("echo stop > /sys/class/remoteproc/remoteproc0/state")
+
+        return render_template("Projects/echo_test.html", output=output)
+    else:
+        return render_template("Projects/echo_test.html", output="")
+
 @app.route('/matrix_mult.html', methods=['GET', 'POST'])
 def matrix_mult():
     if request.method == 'POST':
         os.system("echo image_matrix_multiply > /sys/class/remoteproc/remoteproc0/firmware")
         os.system("echo start > /sys/class/remoteproc/remoteproc0/state")
-        os.system("modprobe rpmsg_user_dev_driver")
-        p = subprocess.Popen("mat_mul_demo", stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-        output, err = p.communicate(input="1\n2")
-        cur_line = 1
-        parsed_output = ""
-        for line in output.splitlines():
-            cur_line = cur_line + 1
-            if cur_line > 17 and cur_line < 48:
-                parsed_output = parsed_output + line + "\n"
-        os.system("modprobe -r rpmsg_user_dev_driver")
+        os.system("modprobe rpmsg_char")
+        os.system("mat_mul_demo > ~/mat_mul_results.txt")
+        output = ""
+        with open("/home/root/mat_mul_results.txt","r") as file:
+            output = file.read()
+
+        os.system("modprobe -r rpmsg_char")
         os.system("echo stop > /sys/class/remoteproc/remoteproc0/state")
-        return render_template("Projects/matrix_mult.html", output=parsed_output)
+
+        return render_template("Projects/matrix_mult.html", output=output)
     else:
         return render_template("Projects/matrix_mult.html", output="")
 
@@ -517,16 +563,22 @@ def proxy_app():
         username = request.form['username']
         age = request.form['age']
         pi = request.form['pi']
-        p = subprocess.Popen("proxy_app", stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-        output, err = p.communicate(input= username + "\n" + age + "\n" + pi + "\nno\n")
-        cur_line = 1
-        parsed_output = ""
-        testname = output.splitlines()
-        for line in output.splitlines():
-            cur_line = cur_line + 1
-            if cur_line > 35 and cur_line < 42:
-                parsed_output = parsed_output + line + "\n"
-        return render_template("Projects/proxy_app.html", output=parsed_output)
+
+        with open("/home/root/proxy_input.txt","w") as file:
+            file.write(str(username + "\n"))
+            file.write(str(age + "\n"))
+            file.write(str(pi + "\n"))
+            file.write(str("no\n"))
+            
+        os.system("proxy_app < ~/proxy_input.txt > ~/proxy_results.txt")
+
+        output = ""
+        with open("/home/root/proxy_results.txt","r") as file:
+            output = file.read()
+
+        os.system("echo stop > /sys/class/remoteproc/remoteproc0/state")
+
+        return render_template("Projects/proxy_app.html", output=output)
     else:
         return render_template("Projects/proxy_app.html", output="")
 

@@ -1,0 +1,90 @@
+<!--
+-
+- Copyright (C) 2016 - 2017 Xilinx, Inc.  All rights reserved.
+-
+- Permission is hereby granted, free of charge, to any person obtaining a copy
+- of this software and associated documentation files (the "Software"), to deal
+- in the Software without restriction, including without limitation the rights
+- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+- copies of the Software, and to permit persons to whom the Software is
+- furnished to do so, subject to the following conditions:
+-
+- The above copyright notice and this permission notice shall be included in
+- all copies or substantial portions of the Software.
+-
+- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+- XILINX CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+- WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+- OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+- SOFTWARE.
+-
+- Except as contained in this notice, the name of the Xilinx shall not be used
+- in advertising or otherwise to promote the sale, use or other dealings in
+- this Software without prior written authorization from Xilinx.
+-
+-
+-
+- Author: Michael Chyziak <chyziak@xilinx.com>
+-
+-->
+
+
+{% extends "Default/default.html" %}
+{% block content %}
+
+<script>
+  function CopyToClipboard(id) {
+    var r = document.createRange();
+    r.selectNode(document.getElementById(id));
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(r);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+  }
+</script>
+
+<div class="page-header">
+  <h1 class="display-4"><b>{% block title %}WiFi iperf3 Client Performance Test{% endblock %}</b></h1>
+</div>
+
+<h2>Description</h2>
+<div class="well">
+
+  <p><strong>The Ultra96 WiFi must be configured and connected (have an IP address) on a wireless LAN (WLAN) to run this example.</strong></p>
+  <p>The iperf3 application provides an easy way to test WiFi or Ethernet throughput.  The iperf3 application works in a client-server arrangement to examine how quickly TCP or UDP packets can be sent or received over a network.</p>
+  <p>This example demonstrates the Ultra96 acting as an <b>iperf3 client</b> to send TCP packets to an iperf3 server on the user's WLAN.  Running this example from the built-in
+    browser on the Ultra96, with the the iperf3 client and server running on the same hardware and essentially operating in loopback mode, will produce invalid LAN throughput 
+    results.  It is best to run this example from a networked device on the user's WLAN.</p>
+  <p>The iperf3 application needs to be installed on the remote device.  Linux users can install this natively via the apt or yum package manager.  Mac and Windows users can <a href="https://software.es.net/iperf/obtaining.html#binary-distributions">find binaries at ESnet</a> (an internet connection is required to view this page).</p>
+  <p>The IP address of this device is: <span style="font-family:'Courier New'">{{ request.remote_addr }}</span></p>
+  <p>Start the iperf3 server on the remote device as follows and then click the <b>Run Project</b> button below.  The iperf3 server will update the speed calculation 
+    every 2 seconds and exit when the test finishes:</p>
+  <p style="font-family:'Courier New'">$ <span id="cmd">iperf3 -s -i 2 -1</span>  <a href="#" onclick="CopyToClipboard('cmd');return false;"><button id="copy">Copy Command</button></a></p>
+
+  <p>The test will run the following command in the background on the Ultra96 to calculate the TCP packet throughput every 2 seconds and complete in 20 seconds.</p>
+  <p style="font-family:'Courier New'">$ iperf3 -c {{ request.remote_addr }} -i 2 -t 20 </p>
+  <p>The complete results will be displayed below after iperf3 is finished.</p>
+  
+  <p>More information on iperf3 can be found at <a href="https://software.es.net/iperf/index.html">ESnet</a> (an internet connection is required to view this page).</p>
+
+</div>
+
+<form action="iperf3_c.html" method="post" id="matrix_form">
+  <center><button type="submit" class="btn btn-primary" id="grey_out" onclick="greyButton()">Run Project</button></center>
+</form>
+
+<script>
+  function greyButton() {
+    document.getElementById("matrix_form").submit();
+    document.getElementById("grey_out").disabled = true;
+  }
+</script>
+
+<div>
+  <label for="textarea"><h2>Output</h2></label>
+  <p style="font-family:'Courier New'"><textarea readonly class="form-control" id="textarea" rows="12">{{ output }}</textarea></p>
+<div>
+
+{% endblock %}
