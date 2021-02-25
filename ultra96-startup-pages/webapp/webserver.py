@@ -576,7 +576,7 @@ def proxy_app():
         with open("/home/root/proxy_results.txt","r") as file:
             output = file.read()
 
-        os.system("echo stop > /sys/class/remoteproc/remoteproc0/state")
+        os.system("rm ~/remote.file")
 
         return render_template("Projects/proxy_app.html", output=output)
     else:
