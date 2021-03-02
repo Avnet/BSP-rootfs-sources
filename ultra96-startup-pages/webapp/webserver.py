@@ -495,7 +495,7 @@ def viewer():
 def iperf3_s():
     if request.method == 'POST':
         #Start the iperf3 server to run and stop after the first connection finishes
-        os.system("iperf3 -s -i 2 -1 > ~/iperf3_s_results.txt")
+        os.system("iperf3 -s -i 2 -1 > /home/root/iperf3_s_results.txt")
         output = ""
         with open("/home/root/iperf3_s_results.txt","r") as file:
             output = file.read()
@@ -511,7 +511,7 @@ def iperf3_c():
         IP_addr = request.environ['REMOTE_ADDR']
       
         #Start the iperf3 client to update every 2 seconds and stop after 20 seconds
-        os.system("iperf3 -c " +IP_addr+ " -i 2 -t 20 > ~/iperf3_c_results.txt")
+        os.system("iperf3 -c " +IP_addr+ " -i 2 -t 20 > /home/root/iperf3_c_results.txt")
 
         output = ""
         with open("/home/root/iperf3_c_results.txt","r") as file:
@@ -527,7 +527,7 @@ def echo_test():
         os.system("echo image_echo_test > /sys/class/remoteproc/remoteproc0/firmware")
         os.system("echo start > /sys/class/remoteproc/remoteproc0/state")
         os.system("modprobe rpmsg_char")
-        os.system("echo_test > ~/echo_results.txt")
+        os.system("echo_test > /home/root/echo_results.txt")
         output = ""
         with open("/home/root/echo_results.txt","r") as file:
             output = file.read()
@@ -545,7 +545,7 @@ def matrix_mult():
         os.system("echo image_matrix_multiply > /sys/class/remoteproc/remoteproc0/firmware")
         os.system("echo start > /sys/class/remoteproc/remoteproc0/state")
         os.system("modprobe rpmsg_char")
-        os.system("mat_mul_demo > ~/mat_mul_results.txt")
+        os.system("mat_mul_demo > /home/root/mat_mul_results.txt")
         output = ""
         with open("/home/root/mat_mul_results.txt","r") as file:
             output = file.read()
@@ -570,13 +570,13 @@ def proxy_app():
             file.write(str(pi + "\n"))
             file.write(str("no\n"))
             
-        os.system("proxy_app < ~/proxy_input.txt > ~/proxy_results.txt")
+        os.system("proxy_app < /home/root/proxy_input.txt > /home/root/proxy_results.txt")
 
         output = ""
         with open("/home/root/proxy_results.txt","r") as file:
             output = file.read()
 
-        os.system("rm ~/remote.file")
+        os.system("rm /home/root/remote.file")
 
         return render_template("Projects/proxy_app.html", output=output)
     else:
