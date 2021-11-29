@@ -45,124 +45,27 @@
         User LEDs 0-3 dropbdown button options as well as LED triggers and LED brightness notifications
 	-->
 	<div class="row text-center">
-	<td><b>LED0/D3</b><br>
-          <select id="dropdown">
-	    <option disabled="disabled" selected="selected" value="0">Unknown</option>
-	    <option value="0">On</option>
-	    <option value="0">Off</option>
-            <option value="0">Linux Heartbeat</option>
-            <option value="0">Linux backlight</option>
-            <option value="0">Linux gpio</option>
-            <option value="0">Linux cpu0</option>
-            <option value="0">Linux cpu1</option>
-            <option value="0">Linux cpu2</option>
-            <option value="0">Linux cpu3</option>
-            <option value="0">Linux default-on</option>
-            <option value="0">Linux transient</option>
-            <option value="0">Linux flash</option>
-            <option value="0">Linux torch</option>
-            <option value="0">Linux mmc1</option>
-            <option value="0">Linux rfkill0</option>
-            <option value="0">Linux phy0tx</option>
-            <option value="0">Linux phy0rx</option>
-            <option value="0">Linux phy0assoc</option>
-            <option value="0">Linux phy0radio</option>
-            <option value="0">Linux hci0-power</option>
-            <option value="0">Linux rfkill1</option>
-	  </select>
-	</td><br><br>
-	<td><b>LED1/D4</b><br>
-          <select id="dropdown">
-	    <option disabled="disabled" selected="selected" value="1" readonly="true">Unknown</option>
-	    <option value="1">On</option>
-	    <option value="1">Off</option>
-            <option value="1">Linux Heartbeat</option>
-            <option value="1">Linux backlight</option>
-            <option value="1">Linux gpio</option>
-            <option value="1">Linux cpu0</option>
-            <option value="1">Linux cpu1</option>
-            <option value="1">Linux cpu2</option>
-            <option value="1">Linux cpu3</option>
-            <option value="1">Linux default-on</option>
-            <option value="1">Linux transient</option>
-            <option value="1">Linux flash</option>
-            <option value="1">Linux torch</option>
-            <option value="1">Linux mmc1</option>
-            <option value="1">Linux rfkill0</option>
-            <option value="1">Linux phy0tx</option>
-            <option value="1">Linux phy0rx</option>
-            <option value="1">Linux phy0assoc</option>
-            <option value="1">Linux phy0radio</option>
-            <option value="1">Linux hci0-power</option>
-            <option value="1">Linux rfkill1</option>
-	  </select>
-	  </select>
-	</td><br><br>
-	<td><b>LED2/D6</b><br>
-          <select id="dropdown">
-            <option disabled="disabled" selected="selected" value="3">Unknown</option>
-	    <option value="3">On</option>
-	    <option value="3">Off</option>
-            <option value="3">Linux Heartbeat</option>
-            <option value="3">Linux backlight</option>
-            <option value="3">Linux gpio</option>
-            <option value="3">Linux cpu0</option>
-            <option value="3">Linux cpu1</option>
-            <option value="3">Linux cpu2</option>
-            <option value="3">Linux cpu3</option>
-            <option value="3">Linux default-on</option>
-            <option value="3">Linux transient</option>
-            <option value="3">Linux flash</option>
-            <option value="3">Linux torch</option>
-            <option value="3">Linux mmc1</option>
-            <option value="3">Linux rfkill0</option>
-            <option value="3">Linux phy0tx</option>
-            <option value="3">Linux phy0rx</option>
-            <option value="3">Linux phy0assoc</option>
-            <option value="3">Linux phy0radio</option>
-            <option value="3">Linux hci0-power</option>
-            <option value="3">Linux rfkill1</option>
-	  </select>
-	  </select>
-	</td><br><br>
-	<td><b>LED3/D7</b><br>
-          <select id="dropdown">
-            <option disabled="disabled" selected="selected" value="2">Unknown</option>
-	    <option value="2">On</option>
-	    <option value="2">Off</option>
-            <option value="2">Linux Heartbeat</option>
-            <option value="2">Linux backlight</option>
-            <option value="2">Linux gpio</option>
-            <option value="2">Linux cpu0</option>
-            <option value="2">Linux cpu1</option>
-            <option value="2">Linux cpu2</option>
-            <option value="2">Linux cpu3</option>
-            <option value="2">Linux default-on</option>
-            <option value="2">Linux transient</option>
-            <option value="2">Linux flash</option>
-            <option value="2">Linux torch</option>
-            <option value="2">Linux mmc1</option>
-            <option value="2">Linux rfkill0</option>
-            <option value="2">Linux phy0tx</option>
-            <option value="2">Linux phy0rx</option>
-            <option value="2">Linux phy0assoc</option>
-            <option value="2">Linux phy0radio</option>
-            <option value="2">Linux hci0-power</option>
-            <option value="2">Linux rfkill1</option>
-	  </select>
-	  </select>
-        </td>
+		{%for led, label in leds.items()%}
+			<td><b>{{label}}</b><br>
+				<select id={{led}}>
+					<option disabled="disabled" selected="selected" value="0">Unknown</option>
+					{%for trigger in triggers%}
+						<option id={{loop.index0}}>{{trigger.label}}</option>
+					{%endfor%}
+				</select>
+			</td><br><br>
+		{%endfor%}
 	</div>
 
         <script>
         $(document).ready(function(){
 	  $("select").on("change", function(){
-            var led_selected = $(this).find(":selected").val();
-	    var led_command = $(this).find(":selected").text();
+            var led = $(this).attr('id');
+            var trigger = $(this).find(":selected").attr('id');
             $.post("Ultra96_LEDs.html",
 	    {
-              led: led_selected,
-	      command: led_command
+          led     : led,
+	      trigger : trigger
 	    });
 	  });
 	});
@@ -184,43 +87,9 @@
 	    </tr>
 	  </thead>
 	  <tbody>
-	    <tr>
-              <td>heartbeat</td>
-	      <td>A heartbeat provided by linux to know that it is still active</td>
-            </tr>
-	    <tr>
-              <td>backlight</td>
-	      <td>To indicate LCD backlight status. Turns ON when LCD backlight is ON else turns OFF</td>
-	    </tr>
-	    <tr>
-              <td>gpio</td>
-	      <td>A trigger to turn ON LED when Input or output operations are being performed with any of the GPIO else turns OFF LED</td>
-	    </tr>
-	    <tr>
-              <td>cpu0</td>
-	      <td>A trigger to turn ON LED when CPU0 is being used and turn OFF when not in use</td>
-	    </tr>
-	    <tr>
-              <td>cpu1</td>
-	      <td>A trigger to turn ON LED when CPU1 is being used and turn OFF when not in use</td>
-	    </tr>
-	    <tr>
-              <td>cpu2</td>
-	      <td>A trigger to turn ON LED when CPU2 is being used and turn OFF when not in use</td>
-	    </tr>
-	    <tr>
-              <td>cpu3</td>
-	      <td>A trigger to turn ON LED when CPU3 is being used and turn OFF when not in use</td>
-	    </tr>
-	    <tr>
-              <td>phy0tx</td>
-	      <td>A trigger turns ON LED when Wi-Fi is transmitting data else turns OFF LED</td>
-	    </tr>
-	    <tr>
-              <td>phy0rx</td>
-	      <td>A trigger turns ON LED when Wi-Fi is receiving data else turns OFF LED</td>
-	    </tr>
-
+		{%for trigger in triggers%}
+			<tr><td>{{trigger.label}}</td><td>{{trigger.definition}}</td></tr>
+		{%endfor%}
 	  </tbody>
 	</table>
 

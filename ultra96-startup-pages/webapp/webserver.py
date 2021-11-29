@@ -51,6 +51,20 @@ timeout = 15
 elapsed_time = 5
 pconn, cconn = Pipe()
 
+leds = {
+    "ds2" : "LED0/D3",
+    "ds3" : "LED1/D4",
+    "ds5" : "LED2/D6",
+    "ds4" : "LED4/D7"
+}
+
+triggers = [
+        { "label" : "Off"       , "definition" : "Turns the led Off",              "file" : "brightness", "value" : "0"},
+        { "label" : "On"        , "definition" : "Turns the led on",               "file" : "brightness", "value" : "255"},
+        { "label" : "Heartbeat" , "definition" : "Blinks in a heart beat fashion", "file" : "trigger",    "value" : "heartbeat"},
+        { "label" : "mmc1"      , "definition" : "Flickers with mmc1 activity",    "file" : "trigger",    "value" : "mmc1"}
+]
+
 @app.route('/')
 @app.route('/home.html', methods=['GET', 'POST'])
 def home():
@@ -278,8 +292,8 @@ def dnf_update():
 @app.route('/Ultra96_LEDs.html', methods=['GET', 'POST'])
 def ultra96_leds():
     if request.method == 'POST':
-        post_Ultra96_leds(request.form['led'], request.form['command'])
-    return render_template("Projects/Ultra96_LEDs.html")
+        post_Ultra96_leds(request.form['led'], request.form['trigger'])
+    return render_template("Projects/Ultra96_LEDs.html", triggers=triggers, leds=leds)
 
 @app.route('/projects.html')
 def projects():
@@ -877,71 +891,12 @@ def reload_webapp():
     return render_template("CustomContent/reload_webapp.html", filelist=filelist, webapp_reload=webapp_reload)
 
 
-def post_Ultra96_leds(led_selection, led_command):
-    led = ""
-    if led_selection == "0":
-        led = "ds2"
-    elif led_selection == "1":
-        led = "ds3"
-    elif led_selection == "2":
-        led = "ds5"
-    elif led_selection == "3":
-        led = "ds4"
-    else:
-        return ("none", "block")
-    if led_command == "On":
-        p = subprocess.call("echo none > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-        if p != 0:
-            return ("none", "block")
-        p = subprocess.call("echo 255 > /sys/class/leds/"+led+"/brightness", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Off":
-        p = subprocess.call("echo none > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-        if p != 0:
-            return ("none", "block")
-        p = subprocess.call("echo 0 > /sys/class/leds/"+led+"/brightness", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux Heartbeat":
-        p = subprocess.call("echo heartbeat > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux backlight":
-        p = subprocess.call("echo backlight > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux gpio":
-        p = subprocess.call("echo gpio > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux cpu0":
-        p = subprocess.call("echo cpu0 > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux cpu1":
-        p = subprocess.call("echo cpu1 > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux cpu2":
-        p = subprocess.call("echo cpu2 > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux cpu3":
-        p = subprocess.call("echo cpu3 > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux default-on":
-        p = subprocess.call("echo default-on > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux transient":
-        p = subprocess.call("echo transient > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux flash":
-        p = subprocess.call("echo flash > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux torch":
-        p = subprocess.call("echo torch > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux mmc1":
-        p = subprocess.call("echo mmc1 > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux rfkill0":
-        p = subprocess.call("echo rfkill0 > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux phy0tx":
-        p = subprocess.call("echo phy0tx > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux phy0rx":
-        p = subprocess.call("echo phy0rx > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux phy0assoc":
-        p = subprocess.call("echo phy0assoc > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux phy0radio":
-        p = subprocess.call("echo phy0radio > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux hci0-power":
-        p = subprocess.call("echo hci0-power > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    elif led_command == "Linux rfkill1":
-        p = subprocess.call("echo phy0assoc > /sys/class/leds/"+led+"/trigger", stdout=subprocess.PIPE, shell=True)
-    else:
-        return ("none", "block")
-    if p != 0:
-        return ("none", "block")
-    return ("block", "none")
+def post_Ultra96_leds(led, trigger):
+    trigger = int(trigger)
+    with open(f'/sys/class/leds/{led}/trigger', "w") as trigger_file:
+        trigger_file.write("none")
+    with open(f'/sys/class/leds/{led}/{triggers[trigger].get("file")}', "w") as led_file:
+        led_file.write(triggers[trigger].get('value'))
 
 def thread_run(proc, timeout, cconn):
     timeout = int(timeout) #Convert string to int
