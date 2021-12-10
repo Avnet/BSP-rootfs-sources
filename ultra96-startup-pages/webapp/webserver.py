@@ -54,8 +54,8 @@ pconn, cconn = Pipe()
 leds = {
     "ds2" : "LED0/D3",
     "ds3" : "LED1/D4",
-    "ds5" : "LED2/D6",
-    "ds4" : "LED4/D7"
+    "ds4" : "LED2/D6",
+    "ds5" : "LED3/D7"
 }
 
 triggers = [
